@@ -10,8 +10,15 @@ console.log('TELEGRAM_BOT_TOKEN:', process.env.TELEGRAM_BOT_TOKEN ? 'SET' : 'NOT
 console.log('STORE_PATH:', process.env.STORE_PATH || 'default');
 console.log('OWNER_ID:', process.env.OWNER_ID || 'not set');
 
+// Если OWNER_ID установлен в переменных окружения, используем его
+const OWNER_ID_FROM_ENV = process.env.OWNER_ID ? parseInt(process.env.OWNER_ID) : null;
+
 // ====== ВЛАДЕЛЕЦ (кто может менять настройки) ======
-const OWNER_IDS = [661057299, 43680181]; // <-- твой Telegram user id
+const OWNER_IDS = [
+  661057299, 
+  43680181,
+  ...(OWNER_ID_FROM_ENV ? [OWNER_ID_FROM_ENV] : [])
+]; // <-- твой Telegram user id
 
 // ====== ТЕКСТЫ ======
 function plural(n, one, few, many) {
@@ -157,11 +164,6 @@ bot.start(async (ctx) => {
   const chatId = String(ctx.chat.id);
   ensureChat(chatId, ctx.chat.type);
 
-  // Логируем информацию о пользователе
-  console.log('User ID:', ctx.from?.id);
-  console.log('Username:', ctx.from?.username);
-  console.log('Is owner:', isOwner(ctx));
-
   if (isGroup(ctx)) {
     return ctx.reply('Бот активирован. Пиши /date чтобы посмотреть, сколько дней осталось.');
   }
@@ -201,11 +203,6 @@ bot.command(['date', 'left'], (ctx) => {
 bot.command('setdate', (ctx) => {
   const chatId = String(ctx.chat.id);
   ensureChat(chatId, ctx.chat.type);
-
-  // Логируем информацию о пользователе
-  console.log('User ID:', ctx.from?.id);
-  console.log('Username:', ctx.from?.username);
-  console.log('Is owner:', isOwner(ctx));
 
   if (isGroup(ctx) && !isOwner(ctx)) return; // игнор
   if (!isGroup(ctx) && !isOwner(ctx)) {

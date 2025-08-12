@@ -163,7 +163,6 @@ async function sendWithRandomImage(ctxOrBot, chatId, text) {
 bot.start(async (ctx) => {
   const chatId = String(ctx.chat.id);
   ensureChat(chatId, ctx.chat.type);
-
   if (isGroup(ctx)) {
     return ctx.reply('Бот активирован. Пиши /date чтобы посмотреть, сколько дней осталось.');
   }
@@ -203,7 +202,6 @@ bot.command(['date', 'left'], (ctx) => {
 bot.command('setdate', (ctx) => {
   const chatId = String(ctx.chat.id);
   ensureChat(chatId, ctx.chat.type);
-
   if (isGroup(ctx) && !isOwner(ctx)) return; // игнор
   if (!isGroup(ctx) && !isOwner(ctx)) {
     // в личке тоже ограничим изменение даты только владельцу

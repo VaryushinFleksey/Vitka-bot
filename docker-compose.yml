@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - STORE_PATH=./store.json
+      - OWNER_ID=${OWNER_ID:-661057299}
+    volumes:
+      - ./store.json:/app/store.json
+    restart: unless-stopped

@@ -3,6 +3,7 @@ import { Telegraf } from 'telegraf';
 import { DateTime } from 'luxon';
 import fs from 'fs';
 import path from 'path';
+import http from 'http';
 
 // Проверяем загрузку переменных окружения
 console.log('Environment check:');
@@ -10,12 +11,20 @@ console.log('TELEGRAM_BOT_TOKEN:', process.env.TELEGRAM_BOT_TOKEN ? 'SET' : 'NOT
 console.log('STORE_PATH:', process.env.STORE_PATH || 'default');
 console.log('OWNER_ID:', process.env.OWNER_ID || 'not set');
 
+// Дополнительная проверка для Railway
+if (!process.env.TELEGRAM_BOT_TOKEN) {
+  console.error('ERROR: TELEGRAM_BOT_TOKEN is not set!');
+  console.error('Please set the TELEGRAM_BOT_TOKEN environment variable in Railway');
+  console.error('Or create a .env file locally');
+  process.exit(1);
+}
+
 // Если OWNER_ID установлен в переменных окружения, используем его
 const OWNER_ID_FROM_ENV = process.env.OWNER_ID ? parseInt(process.env.OWNER_ID) : null;
 
 // ====== ВЛАДЕЛЕЦ (кто может менять настройки) ======
 const OWNER_IDS = [
-  661057299, 
+  661057299,
   43680181,
   ...(OWNER_ID_FROM_ENV ? [OWNER_ID_FROM_ENV] : [])
 ]; // <-- твой Telegram user id
@@ -71,9 +80,18 @@ function randomImageUrl() {
 // ====== ХРАНИЛИЩЕ (файл) ======
 const STORE_PATH = process.env.STORE_PATH || './store.json';
 
+// Проверяем и выводим все важные переменные
+console.log('=== Railway Environment Check ===');
+console.log('TELEGRAM_BOT_TOKEN:', process.env.TELEGRAM_BOT_TOKEN ? '✅ SET' : '❌ NOT SET');
+console.log('STORE_PATH:', STORE_PATH);
+console.log('OWNER_ID:', process.env.OWNER_ID || 'not set');
+console.log('NODE_ENV:', process.env.NODE_ENV || 'not set');
+console.log('PORT:', process.env.PORT || 'not set');
+console.log('================================');
+
 function ensureDirExists(filePath) {
   const dir = path.dirname(filePath);
-  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) { }
 }
 function loadStore() {
   try {
@@ -167,7 +185,7 @@ bot.start(async (ctx) => {
     return ctx.reply('Бот активирован. Пиши /date чтобы посмотреть, сколько дней осталось.');
   }
   return ctx.reply(
-`Привет! Я считаю, сколько дней осталось до заданной даты.
+    `Привет! Я считаю, сколько дней осталось до заданной даты.
 
 Команды (для владельца):
 /setdate 2025-09-10  — установить дату (или 10.09.2025)
@@ -268,6 +286,24 @@ setInterval(async () => {
   }
 }, 60 * 1000);
 
-bot.launch().then(() => console.log('Бот запущен (owner-only admin, /date, фото, авто-08:00)'));
+bot.launch().then(() => {
+  console.log('Бот запущен (owner-only admin, /date, фото, авто-08:00)');
+  console.log('Railway deployment successful!');
+
+  // Для Railway - слушаем на указанном порту
+  if (process.env.PORT) {
+    console.log(`Server listening on port ${process.env.PORT}`);
+
+    // Создаем простой HTTP сервер для health check
+    const server = http.createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end('Bot is running!');
+    });
+
+    server.listen(process.env.PORT, () => {
+      console.log(`HTTP server started on port ${process.env.PORT}`);
+    });
+  }
+});
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));

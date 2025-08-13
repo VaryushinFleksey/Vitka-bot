@@ -7,14 +7,14 @@ import http from 'http';
 
 // Проверяем загрузку переменных окружения
 console.log('Environment check:');
-console.log('TELEGRAM_BOT_TOKEN:', process.env.TELEGRAM_BOT_TOKEN ? 'SET' : 'NOT SET');
+console.log('BOT_TOKEN:', process.env.BOT_TOKEN ? 'SET' : 'NOT SET');
 console.log('STORE_PATH:', process.env.STORE_PATH || 'default');
 console.log('OWNER_ID:', process.env.OWNER_ID || 'not set');
 
 // Дополнительная проверка для Railway
-if (!process.env.TELEGRAM_BOT_TOKEN) {
-  console.error('ERROR: TELEGRAM_BOT_TOKEN is not set!');
-  console.error('Please set the TELEGRAM_BOT_TOKEN environment variable in Railway');
+if (!process.env.BOT_TOKEN) {
+  console.error('ERROR: BOT_TOKEN is not set!');
+  console.error('Please set the BOT_TOKEN environment variable in Railway');
   console.error('Or create a .env file locally');
   process.exit(1);
 }
@@ -82,7 +82,7 @@ const STORE_PATH = process.env.STORE_PATH || './store.json';
 
 // Проверяем и выводим все важные переменные
 console.log('=== Railway Environment Check ===');
-console.log('TELEGRAM_BOT_TOKEN:', process.env.TELEGRAM_BOT_TOKEN ? '✅ SET' : '❌ NOT SET');
+console.log('BOT_TOKEN:', process.env.BOT_TOKEN ? '✅ SET' : '❌ NOT SET');
 console.log('STORE_PATH:', STORE_PATH);
 console.log('OWNER_ID:', process.env.OWNER_ID || 'not set');
 console.log('NODE_ENV:', process.env.NODE_ENV || 'not set');
@@ -140,10 +140,10 @@ function calcDaysLeft(targetISO, tzOffset) {
 }
 
 // ====== БОТ ======
-const botToken = process.env.TELEGRAM_BOT_TOKEN;
+const botToken = process.env.BOT_TOKEN;
 if (!botToken) {
-  console.error('ERROR: TELEGRAM_BOT_TOKEN is not set!');
-  console.error('Please set the TELEGRAM_BOT_TOKEN environment variable');
+  console.error('ERROR: BOT_TOKEN is not set!');
+  console.error('Please set the BOT_TOKEN environment variable');
   process.exit(1);
 }
 const bot = new Telegraf(botToken);
